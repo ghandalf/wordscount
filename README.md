@@ -3,7 +3,10 @@
 The aim of the project is to response an interview question that I had.
 
 I want to thank the interviewer for his patient. In this interview, I mistaken 
-too often, this is why I decided to create this little project.
+too often, this is why I decided to create this little project. 
+
+Those questions are not usual, how often are we going to work with threads 
+this days...
 
 
 ### What was the question? ###

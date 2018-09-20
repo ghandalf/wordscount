@@ -27,7 +27,6 @@ public class MapWordsSearch extends SearchHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(MapWordsSearch.class);
 
-
     private Map<String, Integer> values;
     
     public MapWordsSearch() {

@@ -5,6 +5,7 @@
  */
 package ca.ghandalf.tutorial.wordscount.thread;
 
+import ca.ghandalf.tutorial.wordscount.handler.ListWordsSearch;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author ghandalf
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ParallelTask.class})
+@SpringBootTest(classes = {ParallelTask.class, ListWordsSearch.class})
 public class ParallelTaskTest {
 
     public ParallelTaskTest() {
@@ -56,6 +57,10 @@ public class ParallelTaskTest {
         ParallelTask instance_one = new ParallelTask("ParallelTask One");
         ParallelTask instance_two = new ParallelTask("ParallelTask Two");
         ParallelTask instance_three = new ParallelTask("ParallelTask Three");
+        
+        instance_one.setListWordsSearch(new ListWordsSearch());
+        instance_two.setListWordsSearch(new ListWordsSearch());
+        instance_three.setListWordsSearch(new ListWordsSearch());
 
         final Thread thread_one = new Thread(instance_one, "Thread One");
         final Thread thread_two = new Thread(instance_two, "Thread Two");

@@ -5,8 +5,10 @@
  */
 package ca.ghandalf.tutorial.wordscount.thread;
 
+import ca.ghandalf.tutorial.wordscount.handler.ListWordsSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,6 +22,9 @@ public class ParallelTask implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ParallelTask.class);
 
+    @Autowired
+    private ListWordsSearch listWordsSearch;
+    
     private Thread predecessor;
     private String name;
 
@@ -36,6 +41,7 @@ public class ParallelTask implements Runnable {
 
         String information = "\t\tRunning: [%s] his predecessor is [%s] %n";
         String logInfo = "\t\tRunning: [{}] his predecessor is [{}] \n";
+
         if (predecessor != null) {
             try {
 
@@ -49,6 +55,7 @@ public class ParallelTask implements Runnable {
             System.out.format(information, this.getName(), (predecessor != null) ? predecessor.getName() : "null");
         }
 
+        execute();
         System.out.println(Thread.currentThread().getName() + ": Finished");
     }
 
@@ -67,5 +74,20 @@ public class ParallelTask implements Runnable {
 
     public String getName() {
         return this.name;
+    }
+
+    public ListWordsSearch getListWordsSearch() {
+        return listWordsSearch;
+    }
+
+    public void setListWordsSearch(ListWordsSearch listWordsSearch) {
+        this.listWordsSearch = listWordsSearch;
+    }
+    
+    private void execute() {
+        this.listWordsSearch.loadData("simple.txt");
+        this.listWordsSearch.sort();
+        this.listWordsSearch.extractTheMostUsedWords(4);
+        this.listWordsSearch.printTheMostUsedWords();
     }
 }

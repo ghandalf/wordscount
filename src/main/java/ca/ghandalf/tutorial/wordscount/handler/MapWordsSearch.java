@@ -28,10 +28,10 @@ public class MapWordsSearch extends SearchHandler {
     private static final Logger LOG = LoggerFactory.getLogger(MapWordsSearch.class);
 
     private Map<String, Integer> values;
-    
+
     public MapWordsSearch() {
         super();
-        this.values = new LinkedHashMap<>(); 
+        this.values = new LinkedHashMap<>();
     }
 
     /**
@@ -82,30 +82,33 @@ public class MapWordsSearch extends SearchHandler {
     }
 
     public Map<String, Integer> sortByKey(Map<String, Integer> map) {
-        return Sort.sortMapByKey(map);
+        this.values = Sort.sortMapByKey(map);
+        return this.values;
     }
 
     public Map<String, Integer> sortByValue(Map<String, Integer> map) {
-        return Sort.sortMapByValue(map);
-    }
-
-    public Map<String, Integer> sortByValues(Map<String, Integer> values) {
-        return Sort.sortMapByValue(values);
+        this.values = Sort.sortMapByValue(map);
+        return this.values;
     }
 
     public List<WordContainer> extractTheMostUsedWords(int nbOfMostUsedWords) {
 
-        this.getTheMostUsedWords().clear();
+        List<WordContainer> list = new ArrayList<>();
 
         if (nbOfMostUsedWords < this.values.size()) {
+            this.sortByValue(this.values);
+
             String keys[] = this.values.keySet().toArray(new String[0]);
             Integer currentValues[] = this.values.values().toArray(new Integer[this.values.size()]);
 
-            for (int i = keys.length - nbOfMostUsedWords; i < keys.length; i++) {
-                this.getTheMostUsedWords().add(new WordContainer(keys[i], currentValues[i]));
+            for (int i = 0; i < nbOfMostUsedWords; i++) {
+                list.add(new WordContainer(keys[i], currentValues[i]));
             }
 
+            this.setTheMostUsedWords(list);
+
             return this.getTheMostUsedWords();
+
         } else {
             throw new IllegalArgumentException(
                     "The size of the most used words given is bigger then the size of the data!!!");

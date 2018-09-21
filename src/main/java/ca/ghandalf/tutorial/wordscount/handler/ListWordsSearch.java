@@ -106,16 +106,16 @@ public class ListWordsSearch extends SearchHandler {
 
     public List<WordContainer> extractTheMostUsedWords(int nbOfMostUsedWords) {
 
-        // There is a problem here, when we use the clear() method on the list. 
-        // It is the same method use in MapWordSearch 
-        // the same List definition and if failed with UnsupportedOperation
-//            this.getTheMostUsedWords().clear();
-        this.setTheMostUsedWords(new ArrayList<>());
+        List<WordContainer> list = new ArrayList<>();
 
         synchronized (this.values) {
             if (nbOfMostUsedWords < this.values.size()) {
-                this.setTheMostUsedWords(
-                        this.values.subList(this.values.size() - nbOfMostUsedWords, this.values.size()));
+                this.sortByValue(this.values);
+                list = this.values.subList(this.values.size() - nbOfMostUsedWords, this.values.size());
+
+                Collections.reverse(list);
+                
+                this.setTheMostUsedWords(list);
 
                 return this.getTheMostUsedWords();
 

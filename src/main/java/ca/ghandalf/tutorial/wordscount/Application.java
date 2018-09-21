@@ -6,10 +6,12 @@ import ca.ghandalf.tutorial.wordscount.handler.ListWordsSearch;
 import ca.ghandalf.tutorial.wordscount.handler.MapWordsSearch;
 import ca.ghandalf.tutorial.wordscount.thread.ParallelTask;
 import ca.ghandalf.tutorial.wordscount.util.Sort;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Words count application
@@ -20,14 +22,19 @@ public class Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
+    private static ApplicationContext applicationContext;
+
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        applicationContext = SpringApplication.run(Application.class, args);
 
         if (args.length > 0) {
             String which = args[0];
             System.out.println("Let's begin... ");
 
             switch (which) {
+                case "count":
+                    count();
+                    break;
                 case "list":
                     listWords();
                     break;
@@ -40,8 +47,11 @@ public class Application {
                 case "values":
                     mapByValues();
                     break;
-                case "parallel":
-                    parallelExecution();
+                case "parallel.list":
+                    parallelExecutionList();
+                    break;
+                case "parallel.map":
+                    parallelExecutionMap();
                     break;
                 default:
                     usage();
@@ -51,9 +61,19 @@ public class Application {
         }
     }
 
+    private static void count() {
+        Integer[] values = {1,2,3,4,5,6,7,8,9,10,11,12};
+        System.out.println("values.length = " + values.length);
+        System.out.println("values.length - 2 = " + (values.length - 2));
+        System.out.println("Contenu de la case 10 = " + values[10]);
+        
+        for (int i = values.length - 1; i >= (values.length - 4); i--) {
+            System.out.format("Valeur de i = %s et son contenu %s %n", i, values[i]);
+        }
+    }
     private static void usage() {
         System.out.println("\t Usage:");
-        System.out.println("\t\t\n mvn spring-boot:run -Dspring-boot.run.arguments={list|map|test|values|parallel}\n");
+        System.out.println("\t\t\n mvn spring-boot:run -Dspring-boot.run.arguments={list|map|test|values|parallel.list|parallel.map}\n");
     }
 
     private static void test() {
@@ -120,17 +140,60 @@ public class Application {
         System.out.println("Before sorting...");
         mapWordsSearch.getData().forEach((k, v) -> System.out.println(k + ":" + v));
 
-        Map<String, Integer> currentValues = mapWordsSearch.sortByValues(mapWordsSearch.getData());
+        Map<String, Integer> currentValues = mapWordsSearch.sortByValue(mapWordsSearch.getData());
 
         System.out.println("After sorting...");
         currentValues.forEach((k, v) -> System.out.println(k + ":" + v));
 
     }
 
-    private static void parallelExecution() {
+    private static void parallelExecutionList() {
         ParallelTask instance_one = new ParallelTask("ParallelTask One");
         ParallelTask instance_two = new ParallelTask("ParallelTask Two");
         ParallelTask instance_three = new ParallelTask("ParallelTask Three");
+
+        instance_one.setListWordsSearch(new ListWordsSearch());
+        instance_two.setListWordsSearch(new ListWordsSearch());
+        instance_three.setListWordsSearch(new ListWordsSearch());
+
+        ParallelTask.Handler executor = ParallelTask.Handler.ListWordsSearch;
+        executor.setWords(4);
+        instance_one.setHandler(executor);
+        instance_two.setHandler(executor);
+        instance_three.setHandler(executor);
+
+        final Thread thread_one = new Thread(instance_one, "Thread One");
+        final Thread thread_two = new Thread(instance_two, "Thread Two");
+        final Thread thread_three = new Thread(instance_three, "Thread Three");
+
+        instance_two.setPredecessor(thread_one);
+        instance_three.setPredecessor(thread_two);
+
+        long begin = System.currentTimeMillis();
+        thread_one.start();
+        thread_two.start();
+        thread_three.start();
+        long end = System.currentTimeMillis();
+
+        long elapse = end - begin;
+        System.out.format("It tooks [%s.%s] seconds to execute the call.%n",
+                TimeUnit.MILLISECONDS.toSeconds(elapse) % 60, elapse % 1000);
+    }
+
+    private static void parallelExecutionMap() {
+        ParallelTask instance_one = new ParallelTask("ParallelTask One");
+        ParallelTask instance_two = new ParallelTask("ParallelTask Two");
+        ParallelTask instance_three = new ParallelTask("ParallelTask Three");
+
+        instance_one.setMapWordsSearch(new MapWordsSearch());
+        instance_two.setMapWordsSearch(new MapWordsSearch());
+        instance_three.setMapWordsSearch(new MapWordsSearch());
+
+        ParallelTask.Handler executor = ParallelTask.Handler.MapWordsSearch;
+        executor.setWords(4);
+        instance_one.setHandler(executor);
+        instance_two.setHandler(executor);
+        instance_three.setHandler(executor);
 
         final Thread thread_one = new Thread(instance_one, "Thread One");
         final Thread thread_two = new Thread(instance_two, "Thread Two");

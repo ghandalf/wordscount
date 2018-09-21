@@ -6,6 +6,8 @@
 package ca.ghandalf.tutorial.wordscount.thread;
 
 import ca.ghandalf.tutorial.wordscount.handler.ListWordsSearch;
+import ca.ghandalf.tutorial.wordscount.handler.MapWordsSearch;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,6 +16,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -21,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author ghandalf
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {ParallelTask.class, ListWordsSearch.class})
+@SpringBootTest(classes = {ParallelTask.class, ListWordsSearch.class, MapWordsSearch.class})
 public class ParallelTaskTest {
 
     public ParallelTaskTest() {
@@ -52,15 +55,51 @@ public class ParallelTaskTest {
      *
      * Test of run method, of class ParallelTask.
      */
-    @Test
-    public void parallelExecutionByCallingRun() {
+    @Test(timeout = 1200)
+    public void parallelExecutionByListWords() {
         ParallelTask instance_one = new ParallelTask("ParallelTask One");
         ParallelTask instance_two = new ParallelTask("ParallelTask Two");
         ParallelTask instance_three = new ParallelTask("ParallelTask Three");
-        
+
+        // Spring Context is not used here. 
         instance_one.setListWordsSearch(new ListWordsSearch());
         instance_two.setListWordsSearch(new ListWordsSearch());
         instance_three.setListWordsSearch(new ListWordsSearch());
+
+        ParallelTask.Handler executor = ParallelTask.Handler.ListWordsSearch;
+        executor.setWords(4);
+        instance_one.setHandler(executor);
+        instance_two.setHandler(executor);
+        instance_three.setHandler(executor);
+
+        final Thread thread_one = new Thread(instance_one, "Thread One");
+        final Thread thread_two = new Thread(instance_two, "Thread Two");
+        final Thread thread_three = new Thread(instance_three, "Thread Three");
+
+        instance_two.setPredecessor(thread_one);
+        instance_three.setPredecessor(thread_two);
+
+        thread_one.start();
+        thread_two.start();
+        thread_three.start();
+    }
+
+    @Test(timeout = 1200)
+    public void parallelExecutionByMapWords() {
+        ParallelTask instance_one = new ParallelTask("ParallelTask One");
+        ParallelTask instance_two = new ParallelTask("ParallelTask Two");
+        ParallelTask instance_three = new ParallelTask("ParallelTask Three");
+
+        // Spring Context is not used here.
+        instance_one.setMapWordsSearch(new MapWordsSearch());
+        instance_two.setMapWordsSearch(new MapWordsSearch());
+        instance_three.setMapWordsSearch(new MapWordsSearch());
+
+        ParallelTask.Handler executor = ParallelTask.Handler.MapWordsSearch;
+        executor.setWords(4);
+        instance_one.setHandler(executor);
+        instance_two.setHandler(executor);
+        instance_three.setHandler(executor);
 
         final Thread thread_one = new Thread(instance_one, "Thread One");
         final Thread thread_two = new Thread(instance_two, "Thread Two");
@@ -78,7 +117,7 @@ public class ParallelTaskTest {
      * Test of setPredecessor method, of class ParallelTask.
      */
     @Test
-    public void testSetPredecessor() {
+    public void setNullredecessor() {
         Thread predecessor = null;
 
         ParallelTask instance = new ParallelTask("ParallelTask One");

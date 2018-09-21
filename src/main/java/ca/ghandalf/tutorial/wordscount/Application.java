@@ -169,15 +169,9 @@ public class Application {
         instance_two.setPredecessor(thread_one);
         instance_three.setPredecessor(thread_two);
 
-        long begin = System.currentTimeMillis();
         thread_one.start();
         thread_two.start();
-        thread_three.start();
-        long end = System.currentTimeMillis();
-
-        long elapse = end - begin;
-        System.out.format("It tooks [%s.%s] seconds to execute the call.%n",
-                TimeUnit.MILLISECONDS.toSeconds(elapse) % 60, elapse % 1000);
+        thread_three.start(); 
     }
 
     private static void parallelExecutionMap() {
